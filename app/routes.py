@@ -203,7 +203,28 @@ def edit_item(item_id):
     else:
         return redirect(url_for('main.login'))
 
-# Los demás endpoints siguen la misma lógica, solo cambiamos el acceso a la base de datos como lo he hecho con los anteriores.
+@main_blueprint.route('/payout')
+def payout():
+    if 'user_type' in session:
+        if session['is_admin']:
+            # Obtener todos los ítems con estado 'sold'
+            database_api.conectar()
+            query = "SELECT * FROM items WHERE status = 'sold'"
+            database_api.db.execute(query)
+            payout_items = database_api.db.fetchall()
+            database_api.desconectar()
+        else:
+            # Obtener solo los ítems del usuario con estado 'sold'
+            user_email = session['user']
+            database_api.conectar()
+            query = "SELECT * FROM items WHERE user_email = %s AND status = 'sold'"
+            database_api.db.execute(query, (user_email,))
+            payout_items = database_api.db.fetchall()
+            database_api.desconectar()
+
+        return render_template('payout.html', items=payout_items)
+    else:
+        return redirect(url_for('main.login'))
 
 @main_blueprint.route('/logout')
 def logout():
