@@ -38,26 +38,28 @@ def login():
         database_api.conectar()
         
         # Consultar si el usuario existe en la base de datos
-        query = "SELECT email, password, id FROM users WHERE email = %s"
+        query = "SELECT email, password, id, is_admin FROM users WHERE email = %s"
         database_api.db.execute(query, (email,))
-        user = database_api.db.fetchone()  # Devuelve una tupla (email, password_hash, id)
+        user = database_api.db.fetchone()  # Devuelve una tupla (email, password_hash, id, is_admin)
         
         database_api.desconectar()
 
         if user:
-            db_email, db_password, user_id = user
+            db_email, db_password, user_id, is_admin = user
 
             # Compara la contraseña ingresada con la contraseña almacenada usando bcrypt
             if bcrypt.checkpw(password.encode('utf-8'), db_password.encode('utf-8')):
                 session['user'] = db_email
                 session['user_id'] = user_id
+                session['is_admin'] = is_admin
 
-                if db_email == "admin@example.com":  # Aquí podrías usar un campo is_admin en la BD
+                if is_admin:  # Si es administrador
                     session['user_type'] = 'admin'
-                    session['is_admin'] = True
                 else:
                     session['user_type'] = 'user'
-                    session['is_admin'] = False
+
+                # Aquí agregamos un print para verificar los valores
+                print(f"Usuario logueado: {session['user']}, es admin: {session['is_admin']}")
                 
                 return redirect(url_for('main.inventory'))
             else:
