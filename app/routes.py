@@ -92,9 +92,26 @@ def inventory():
         database_api.db.execute(query, (user_email,))
         user_items = database_api.db.fetchall()
 
+    # Convertimos las tuplas en diccionarios para un manejo más sencillo en el template
+    items_dict = []
+    for item in user_items:
+        item_dict = {
+            'id': item[0],  # Ajusta los índices según tu tabla
+            'name': item[1],
+            'color': item[2],
+            'size': item[3],
+            'status': item[4],
+            'purchase_price': item[5],
+            'sale_price': item[6],
+            'condition': item[7],
+            'date': item[8],
+            'consignor': item[9]
+        }
+        items_dict.append(item_dict)
+
     database_api.desconectar()
 
-    return render_template('inventory.html', items=user_items, is_admin=is_admin)
+    return render_template('inventory.html', items=items_dict, is_admin=is_admin)
 
 @main_blueprint.route('/view_profile/<int:user_id>')
 def view_profile(user_id):
@@ -121,7 +138,24 @@ def view_profile(user_id):
                 'name': user_data[2]
             }
 
-            return render_template('view_profile.html', user=user, items=user_items)
+            # Convertimos los ítems en diccionarios
+            items_dict = []
+            for item in user_items:
+                item_dict = {
+                    'id': item[0],  # Ajusta los índices según tu tabla
+                    'name': item[1],
+                    'color': item[2],
+                    'size': item[3],
+                    'status': item[4],
+                    'purchase_price': item[5],
+                    'sale_price': item[6],
+                    'condition': item[7],
+                    'date': item[8],
+                    'consignor': item[9]
+                }
+                items_dict.append(item_dict)
+
+            return render_template('view_profile.html', user=user, items=items_dict)
         else:
             flash('Usuario no encontrado.')
             return redirect(url_for('main.profile_admin'))
