@@ -288,14 +288,21 @@ def profile():
 def profile_admin():
     if 'user_type' in session and session['is_admin']:
         database_api.conectar()
-        query = "SELECT * FROM users"
+
+        # Obtenemos los usuarios como tuplas
+        query = "SELECT id, email, name FROM users"
         database_api.db.execute(query)
-        users = database_api.db.fetchall()
+        user_tuples = database_api.db.fetchall()
+
+        # Convertimos las tuplas en diccionarios para facilitar el acceso en el template
+        users = [{'id': user[0], 'email': user[1], 'name': user[2]} for user in user_tuples]
+
         database_api.desconectar()
 
         return render_template('profile_admin.html', users=users)
     else:
         return redirect(url_for('main.login'))
+
 
 @main_blueprint.route('/profile_user')
 def profile_user():
