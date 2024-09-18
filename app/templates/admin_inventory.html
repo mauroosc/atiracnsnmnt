@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Inventory</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h2>Admin Inventory</h2>
+        <p>Show all inventory items here.</p>
+        <a href="{{ url_for('main.create_item') }}" class="btn">Create New Item</a>
+        <a href="{{ url_for('main.logout') }}" class="btn">Logout</a>
+    </div>
+</body>
+</html>

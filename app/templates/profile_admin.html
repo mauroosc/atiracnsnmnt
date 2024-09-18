@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de Administrador{% endblock %}
+
+{% block content %}
+    <h2>Perfiles de Usuarios</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td><a href="{{ url_for('main.view_profile', user_id=user.id) }}">{{ user.email }}</a></td>
+                <td>
+                    <a href="{{ url_for('main.edit_user', user_id=user.id) }}">Editar</a> |
+                    <a href="{{ url_for('main.delete_user', user_id=user.id) }}" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

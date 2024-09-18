@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Payout History{% endblock %}
+
+{% block content %}
+    <h2>Payout History</h2>
+    {% if items %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Color</th>
+                    <th>Size</th>
+                    <th>Status</th>
+                    <th>Purchase Price</th>
+                    <th>Sale Price</th>
+                    <th>Condition</th>
+                    <th>Consignor</th>
+                    <th>Date</th>
+                    <th>Extra Info</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.color }}</td>
+                        <td>{{ item.size }}</td>
+                        <td>{{ item.status }}</td>
+                        <td>{{ item.purchase_price }}</td>
+                        <td>{{ item.sale_price }}</td>
+                        <td>{{ item.condition }}</td>
+                        <td>{{ item.consignor }}</td>
+                        <td>{{ item.date }}</td>
+                        <td>{{ item.extra_info }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No items found in payout history.</p>
+    {% endif %}
+{% endblock %}

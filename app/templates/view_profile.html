@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Perfil de {{ user.name }}{% endblock %}
+
+{% block content %}
+    <h2>Perfil de {{ user.name }}</h2>
+    <p>Email: {{ user.email }}</p>
+    <p>Nombre: {{ user.name }}</p>
+    
+    <a href="{{ url_for('main.create_item', user_id=user.id) }}">Agregar nuevo ítem</a>
+    
+    <h3>Ítems de {{ user.name }}</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Color</th>
+                <th>Talle</th>
+                <th>Estado</th>
+                <th>Precio Compra</th>
+                <th>Precio Venta</th>
+                <th>Condición</th>
+                <th>Fecha</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.color }}</td>
+                <td>{{ item.size }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ item.purchase_price }}</td>
+                <td>{{ item.sale_price }}</td>
+                <td>{{ item.condition }}</td>
+                <td>{{ item.date }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}">Editar</a> |
+                    <a href="{{ url_for('main.delete_item', item_id=item.id) }}" onclick="return confirm('¿Estás seguro de que deseas eliminar este ítem?');">Eliminar</a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9">No hay ítems</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
