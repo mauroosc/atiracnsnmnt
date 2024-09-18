@@ -351,14 +351,26 @@ def edit_user(user_id):
     if 'user_type' in session and session['is_admin']:
         database_api.conectar()
 
-        query_user = "SELECT * FROM users WHERE id = %s"
+        # Obtener el usuario a editar
+        query_user = "SELECT id, email, name FROM users WHERE id = %s"
         database_api.db.execute(query_user, (user_id,))
-        user_to_edit = database_api.db.fetchone()
+        user_data = database_api.db.fetchone()
 
-        if user_to_edit:
+        if user_data:
+            # Descomponer la tupla en un diccionario
+            user_to_edit = {
+                'id': user_data[0],
+                'email': user_data[1],
+                'name': user_data[2]
+            }
+
             if request.method == 'POST':
                 # Actualizar los datos del usuario en la base de datos
-                query_update = "UPDATE users SET email = %s, name = %s WHERE id = %s"
+                query_update = """
+                UPDATE users
+                SET email = %s, name = %s
+                WHERE id = %s
+                """
                 database_api.db.execute(query_update, (
                     request.form['email'],
                     request.form['name'],
@@ -376,6 +388,7 @@ def edit_user(user_id):
             return redirect(url_for('main.profile_admin'))
     else:
         return redirect(url_for('main.login'))
+
 
 @main_blueprint.route('/delete_user/<int:user_id>')
 def delete_user(user_id):
