@@ -135,11 +135,18 @@ def create_item(user_id):
         database_api.conectar()
 
         # Obtener información del usuario
-        query_user = "SELECT * FROM users WHERE id = %s"
+        query_user = "SELECT id, email, name FROM users WHERE id = %s"
         database_api.db.execute(query_user, (user_id,))
-        user = database_api.db.fetchone()
+        user_data = database_api.db.fetchone()
 
-        if user:
+        if user_data:
+            # Convertir la tupla en un diccionario
+            user = {
+                'id': user_data[0],
+                'email': user_data[1],
+                'name': user_data[2]
+            }
+
             if request.method == 'POST':
                 # Insertar un nuevo ítem en la base de datos
                 query_insert = """
