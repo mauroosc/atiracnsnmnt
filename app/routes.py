@@ -102,9 +102,9 @@ def view_profile(user_id):
         database_api.conectar()
 
         # Obtener información del usuario
-        query_user = "SELECT * FROM users WHERE id = %s"
+        query_user = "SELECT id, email, name FROM users WHERE id = %s"
         database_api.db.execute(query_user, (user_id,))
-        user = database_api.db.fetchone()
+        user_data = database_api.db.fetchone()
 
         # Obtener ítems del usuario
         query_items = "SELECT * FROM items WHERE user_id = %s"
@@ -113,13 +113,21 @@ def view_profile(user_id):
 
         database_api.desconectar()
 
-        if user:
+        if user_data:
+            # Descomponer la tupla en un diccionario
+            user = {
+                'id': user_data[0],
+                'email': user_data[1],
+                'name': user_data[2]
+            }
+
             return render_template('view_profile.html', user=user, items=user_items)
         else:
             flash('Usuario no encontrado.')
             return redirect(url_for('main.profile_admin'))
     else:
         return redirect(url_for('main.login'))
+
 
 @main_blueprint.route('/create_item/<int:user_id>', methods=['GET', 'POST'])
 def create_item(user_id):
