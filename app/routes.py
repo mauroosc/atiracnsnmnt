@@ -25,6 +25,10 @@ database_api = database()
 # Flask Blueprint
 main_blueprint = Blueprint('main', __name__)
 
+@main_blueprint.route('/')
+def home():
+    return redirect(url_for('main.login'))
+
 @main_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
