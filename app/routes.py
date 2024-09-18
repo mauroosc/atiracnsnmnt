@@ -222,6 +222,19 @@ def edit_item(item_id):
         item_to_edit = database_api.db.fetchone()
 
         if item_to_edit:
+            # Convertimos la tupla en un diccionario
+            item = {
+                'id': item_to_edit[0],  # Ajusta los índices según tu tabla
+                'name': item_to_edit[1],
+                'color': item_to_edit[2],
+                'size': item_to_edit[3],
+                'status': item_to_edit[4],
+                'purchase_price': item_to_edit[5],
+                'sale_price': item_to_edit[6],
+                'condition': item_to_edit[7],
+                'date': item_to_edit[8]
+            }
+
             if request.method == 'POST':
                 # Actualizar los datos del ítem en la base de datos
                 query_update = """
@@ -244,14 +257,15 @@ def edit_item(item_id):
 
                 flash(f'Ítem {item_id} actualizado con éxito.')
                 return redirect(url_for('main.inventory'))
-            
+
             database_api.desconectar()
-            return render_template('edit_item.html', item=item_to_edit)
+            return render_template('edit_item.html', item=item)
         else:
             flash(f'Ítem {item_id} no encontrado.')
             return redirect(url_for('main.inventory'))
     else:
         return redirect(url_for('main.login'))
+
 
 @main_blueprint.route('/delete_item/<int:item_id>')
 def delete_item(item_id):
