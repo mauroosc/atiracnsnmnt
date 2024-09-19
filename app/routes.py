@@ -26,7 +26,8 @@ main_blueprint = Blueprint('main', __name__)
 
 @main_blueprint.route('/')
 def home():
-    return redirect(url_for('main.login'))
+    return render_template('home.html')
+
 
 @main_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -53,23 +54,19 @@ def login():
                 session['user_id'] = user_id
                 session['is_admin'] = is_admin
 
-                if is_admin:  # Si es administrador
+                if is_admin:
                     session['user_type'] = 'admin'
                 else:
                     session['user_type'] = 'user'
-
-                # Aquí agregamos un print para verificar los valores
-                print(f"Usuario logueado: {session['user']}, es admin: {session['is_admin']}")
                 
                 return redirect(url_for('main.inventory'))
             else:
-                flash('Contraseña incorrecta. Por favor intenta de nuevo.')
+                flash('Email or password was incorrect')
         else:
-            flash('Usuario no encontrado. Por favor intenta de nuevo.')
+            flash('Email or password was incorrect')
 
-        return redirect(url_for('main.login'))
-    
     return render_template('login.html')
+
 
 @main_blueprint.route('/inventory')
 def inventory():
@@ -101,8 +98,8 @@ def inventory():
             'color': item[2],
             'size': item[3],
             'status': item[4],
-            'purchase_price': item[5],
-            'sale_price': item[6],
+            'net': item[5],  # Cambiado a 'net'
+            'price': item[6],  # Cambiado a 'price'
             'condition': item[7],
             'date': item[8],
             'consignor': item[9]
@@ -147,8 +144,8 @@ def view_profile(user_id):
                     'color': item[2],
                     'size': item[3],
                     'status': item[4],
-                    'purchase_price': item[5],
-                    'sale_price': item[6],
+                    'net': item[5],  # Cambiado a 'net'
+                    'price': item[6],  # Cambiado a 'price'
                     'condition': item[7],
                     'date': item[8],
                     'consignor': item[9]
@@ -161,7 +158,6 @@ def view_profile(user_id):
             return redirect(url_for('main.profile_admin'))
     else:
         return redirect(url_for('main.login'))
-
 
 @main_blueprint.route('/create_item/<int:user_id>', methods=['GET', 'POST'])
 def create_item(user_id):
@@ -182,27 +178,42 @@ def create_item(user_id):
             }
 
             if request.method == 'POST':
-                # Insertar un nuevo ítem en la base de datos
-                query_insert = """
-                INSERT INTO items (user_id, name, color, size, status, purchase_price, sale_price, condition, date)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """
-                database_api.db.execute(query_insert, (
-                    user_id,
-                    request.form['name'],
-                    request.form['color'],
-                    request.form['size'],
-                    request.form['status'],
-                    request.form['purchase_price'],
-                    request.form.get('sale_price', 'N/A'),
-                    request.form['condition'],
-                    request.form['date']
-                ))
-                database_api.desconectar()
+                # Recoge los datos del formulario
+                name = request.form.get('name')
+                color = request.form.get('color')
+                size = request.form.get('size')
+                status = request.form.get('status')
+                net = request.form.get('net')  # Cambiamos de "purchase_price" a "net"
+                price = request.form.get('price')
+                condition = request.form.get('condition')
+                date = request.form.get('date')
 
-                flash('Ítem creado con éxito.')
-                return redirect(url_for('main.view_profile', user_id=user_id))
-            
+                # Agregar un print para ver los valores recibidos
+                print(f"Datos recibidos - name: {name}, color: {color}, size: {size}, status: {status}, net: {net}, price: {price}, condition: {condition}, date: {date}")
+
+                # Verificar que todos los campos obligatorios estén presentes
+                if not (name and color and size and status and net and condition and date):
+                    flash('Todos los campos obligatorios deben ser completados.')
+                    return redirect(url_for('main.create_item', user_id=user_id))
+
+                # Insertar un nuevo ítem en la base de datos
+                try:
+                    query_insert = """
+                    INSERT INTO items (user_id, name, color, size, status, net, price, condition, date)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    database_api.db.execute(query_insert, (
+                        user_id, name, color, size, status, net, price, condition, date
+                    ))
+                    database_api.desconectar()
+
+                    flash('Ítem creado con éxito.')
+                    return redirect(url_for('main.view_profile', user_id=user_id))
+                except Exception as e:
+                    database_api.desconectar()
+                    flash(f'Error al crear el ítem: {str(e)}')
+                    return redirect(url_for('main.create_item', user_id=user_id))
+
             database_api.desconectar()
             return render_template('create_item.html', user=user)
         else:
@@ -210,6 +221,7 @@ def create_item(user_id):
             return redirect(url_for('main.inventory'))
     else:
         return redirect(url_for('main.login'))
+
 
 @main_blueprint.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
 def edit_item(item_id):
@@ -229,8 +241,8 @@ def edit_item(item_id):
                 'color': item_to_edit[2],
                 'size': item_to_edit[3],
                 'status': item_to_edit[4],
-                'purchase_price': item_to_edit[5],
-                'sale_price': item_to_edit[6],
+                'net': item_to_edit[5],  # Cambiado a 'net'
+                'price': item_to_edit[6],  # Cambiado a 'price'
                 'condition': item_to_edit[7],
                 'date': item_to_edit[8]
             }
@@ -239,7 +251,7 @@ def edit_item(item_id):
                 # Actualizar los datos del ítem en la base de datos
                 query_update = """
                 UPDATE items
-                SET name = %s, color = %s, size = %s, status = %s, purchase_price = %s, sale_price = %s, condition = %s, date = %s
+                SET name = %s, color = %s, size = %s, status = %s, net = %s, price = %s, condition = %s, date = %s
                 WHERE id = %s
                 """
                 database_api.db.execute(query_update, (
@@ -247,8 +259,8 @@ def edit_item(item_id):
                     request.form['color'],
                     request.form['size'],
                     request.form['status'],
-                    request.form['purchase_price'],
-                    request.form.get('sale_price', 'N/A'),
+                    request.form['net'],  # Cambiado a 'net'
+                    request.form.get('price', 'N/A'),  # Cambiado a 'price'
                     request.form['condition'],
                     request.form['date'],
                     item_id
