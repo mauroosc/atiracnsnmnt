@@ -3,6 +3,9 @@
 {% block title %}Inventario{% endblock %}
 
 {% block content %}
+
+
+    <!-- Contenido principal de la página -->
     <h2>Inventory</h2>
     <table>
         <thead>
@@ -26,8 +29,8 @@
                 <td>{{ item.color }}</td>
                 <td>{{ item.size }}</td>
                 <td>{{ item.status }}</td>
-                <td>{{ item.purchase_price }}</td>
-                <td>{{ item.sale_price }}</td>                
+                <td>{{ item.net }}</td>
+                <td>{{ item.price }}</td>                
                 <td>{{ item.condition }}</td>
                 <!-- Aquí mostramos el consignador -->
                 <td>{{ item.consignor }}</td>
@@ -40,4 +43,5 @@
             {% endfor %}
         </tbody>
     </table>
+
 {% endblock %}

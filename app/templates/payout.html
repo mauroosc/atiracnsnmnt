@@ -5,36 +5,40 @@
 {% block content %}
     <h2>Payout</h2>
     {% if items %}
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Color</th>
-                    <th>Size</th>
-                    <th>Status</th>
-                    <th>Net</th>
-                    <th>Price</th>
-                    <th>Condition</th>
-                    <th>Consignor</th>
-                    <th>Date</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in items %}
-                    <tr>
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.color }}</td>
-                        <td>{{ item.size }}</td>
-                        <td>{{ item.status }}</td>
-                        <td>{{ item.purchase_price }}</td>
-                        <td>{{ item.sale_price }}</td>
-                        <td>{{ item.condition }}</td>
-                        <td>{{ item.consignor }}</td>
-                        <td>{{ item.date }}</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Color</th>
+                <th>Talle</th>
+                <th>Status</th>
+                <th>Net</th>
+                <th>Price</th>
+                <th>Condición</th>
+                <th>Consignor</th>
+                <th>Fecha</th>
+                <th>Acciones</th> <!-- Nueva columna para el botón de editar -->
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.color }}</td>
+                <td>{{ item.size }}</td>
+                <td>{{ item.status }}</td>
+                <td>{{ item.net }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.condition }}</td>
+                <td>{{ item.consignor }}</td>
+                <td>{{ item.date }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}">Editar</a> <!-- Botón para editar -->
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>   
     {% else %}
         <p>No items found.</p>
     {% endif %}

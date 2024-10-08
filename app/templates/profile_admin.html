@@ -1,23 +1,34 @@
 {% extends 'base.html' %}
 
-{% block title %}Perfil de Administrador{% endblock %}
+{% block title %}Perfiles de Usuarios{% endblock %}
 
 {% block content %}
     <h2>Perfiles de Usuarios</h2>
+    
+    <!-- Botón para agregar nuevo usuario -->
+    <a href="{{ url_for('main.create_user') }}" class= "add-user-container btn">Agregar nuevo usuario</a>
+    <div class="add-user-container">
+    </div>
+
     <table>
         <thead>
             <tr>
                 <th>Email</th>
+                <th>Nombre</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
             {% for user in users %}
             <tr>
-                <td><a href="{{ url_for('main.view_profile', user_id=user.id) }}">{{ user.email }}</a></td>
                 <td>
-                    <a href="{{ url_for('main.edit_user', user_id=user.id) }}">Editar</a> |
-                    <a href="{{ url_for('main.delete_user', user_id=user.id) }}" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
+                    <!-- Hacer clic en el email lleva al perfil del usuario -->
+                    <a href="{{ url_for('main.view_profile', user_id=user.id) }}">{{ user.email }}</a>
+                </td>
+                <td>{{ user.name }}</td>
+                <td>
+                    <a href="{{ url_for('main.edit_user', user_id=user.id) }}">Editar</a> | 
+                    <a href="{{ url_for('main.delete_user', user_id=user.id) }}" onclick="return confirm('Are you sure you want to delete this user?');">Eliminar</a>
                 </td>
             </tr>
             {% endfor %}

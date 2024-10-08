@@ -1,50 +1,300 @@
+/* ======= Estilo General ======= */
 body {
+    background-color: #1e1e1e;
+    color: #f5f5f5;
     font-family: Arial, sans-serif;
-    background-color: #222;
-    color: white;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
-.container {
-    width: 80%;
-    margin: 0 auto;
-}
-
-h2 {
+h2, h3 {
+    color: #f5f5f5;
+    margin-bottom: 20px;
     text-align: center;
+    margin-top: 80px; /* Espacio para que el título esté debajo de la barra de navegación */
+    position: relative;
 }
 
-label {
-    display: block;
+p {
     margin-bottom: 10px;
+    font-size: 16px;
 }
 
-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 20px;
-}
-
-.btn {
-    display: block;
-    width: 100%;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    text-align: center;
+a {
+    color: #00bcd4;
     text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ======= Contenedores Generales ======= */
+.container, .login-container, .item-container, .form-container, .edit-item-container {
+    background-color: #2e2e2e;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.container h2, .login-container h2, .item-container h2, .form-container h2, .edit-item-container h2 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #f5f5f5;
+}
+
+/* ======= Formularios y Entradas ======= */
+input[type="text"], 
+input[type="email"], 
+input[type="password"], 
+input[type="number"], 
+input[type="date"], 
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 20px;
+    border: none;
+    border-radius: 5px;
+    background-color: #444;
+    color: #f5f5f5;
+    font-size: 14px;
+}
+
+/* ======= Botones ======= */
+button, .btn {
+    background-color: #00bcd4;
+    color: white;
+    padding: 12px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
     cursor: pointer;
+    width: 100%;
 }
 
-.btn:hover {
-    background-color: #0056b3;
+button:hover, .btn:hover {
+    background-color: #008c9e;
 }
 
+/* ======= Mensajes de Alerta ======= */
 .alert {
-    background-color: #ff4d4d;
+    background-color: #ff4444;
     color: white;
     padding: 10px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+}
+
+/* ======= Barra de Navegación ======= */
+nav {
+    background-color: #333;
+    padding: 10px 0;
     text-align: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+nav ul {
+    list-style-type: none;
+    margin: 0 auto;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+}
+
+nav ul li {
+    margin: 0 20px;
+}
+
+nav ul li a {
+    color: #f5f5f5;
+    text-decoration: none;
+    padding: 10px 20px;
+    font-size: 18px;
     border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+nav ul li a:hover {
+    background-color: #555;
+}
+
+nav ul li a.active {
+    background-color: #444;
+    color: #fff;
+}
+
+/* ======= Tablas ======= */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background-color: #2e2e2e;
+}
+
+table th, table td {
+    border: 1px solid #444;
+    padding: 10px;
+    text-align: center;
+}
+
+table th {
+    background-color: #444;
+    color: #fff;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+table td {
+    background-color: #333;
+    color: #ddd;
+}
+
+table tr:nth-child(even) td {
+    background-color: #2c2c2c;
+}
+
+/* ======= Ajustes de ancho para las columnas ======= */
+table th:nth-child(1), /* Name */
+table td:nth-child(1) {
+    width: 20%;
+}
+
+table th:nth-child(2), /* Color */
+table td:nth-child(2) {
+    width: 10%;
+}
+
+table th:nth-child(3), /* Size */
+table td:nth-child(3) {
+    width: 5%;
+}
+
+table th:nth-child(4), /* Status */
+table td:nth-child(4) {
+    width: 10%;
+}
+
+table th:nth-child(5), /* Net */
+table td:nth-child(5) {
+    width: 10%;
+}
+
+table th:nth-child(6), /* Price */
+table td:nth-child(6) {
+    width: 10%;
+}
+
+table th:nth-child(7), /* Condition */
+table td:nth-child(7) {
+    width: 10%;
+}
+
+table th:nth-child(8), /* Consignor */
+table td:nth-child(8) {
+    width: 15%;
+}
+
+table th:nth-child(9), /* Date */
+table td:nth-child(9) {
+    width: 10%;
+}
+
+table th:nth-child(10), /* Actions */
+table td:nth-child(10) {
+    width: 10%;
+}
+
+/* ======= Página de Home ======= */
+.home-page {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.home-page h1 {
+    font-size: 48px;
+    color: #00bcd4;
+    margin-bottom: 20px;
+}
+
+.home-page button {
+    font-size: 18px;
+    padding: 12px 24px;
+}
+
+/* ======= Página de Perfil ======= */
+.profile-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 90%;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.user-info {
+    flex: 1;
+    margin-right: 20px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-info p {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.user-items {
+    flex: 2;
+}
+
+.user-items table {
+    width: 100%;
+}
+
+.user-items .btn {
+    display: inline-block;
+    margin-top: 20px;
+}
+
+/* ======= Página de Editar Item ======= */
+.edit-item-container label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: #f5f5f5;
+}
+
+/* ======= Ajustes para Pantallas Pequeñas ======= */
+@media (max-width: 600px) {
+    .container, .login-container, .item-container, .form-container, .edit-item-container {
+        width: 90%;
+        padding: 20px;
+    }
+}
+
+/* ======= Centramos el contenido en la página ======= */
+.content {
+    min-height: calc(100vh - 50px);  /* Restamos la altura de la barra de navegación */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 60px;  /* Espacio para que la barra de navegación no cubra el contenido */
 }

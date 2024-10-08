@@ -1,17 +1,34 @@
-{% extends 'base.html' %}
-
-{% block title %}Editar Usuario{% endblock %}
-
-{% block content %}
-    <h2>Editar Usuario</h2>
-
-    <form action="{{ url_for('main.edit_user', user_id=user.id) }}" method="POST">
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" value="{{ user.email }}" required><br>
-
+<div class="edit-item-container">
+    <h2>Editar ítem</h2>
+    <form method="POST" action="{{ url_for('main.edit_item', item_id=item.id) }}">
         <label for="name">Nombre:</label>
-        <input type="text" id="name" name="name" value="{{ user.name }}" required><br>
+        <input type="text" id="name" name="name" value="{{ item.name }}" required>
+        
+        <label for="color">Color:</label>
+        <input type="text" id="color" name="color" value="{{ item.color }}" required>
+        
+        <label for="size">Talle:</label>
+        <input type="text" id="size" name="size" value="{{ item.size }}" required>
+        
+        <label for="status">Estado:</label>
+        <select id="status" name="status">
+            <option value="in stock" {% if item.status == 'in stock' %}selected{% endif %}>In stock</option>
+            <option value="sold" {% if item.status == 'sold' %}selected{% endif %}>Sold</option>
+            <option value="paid" {% if item.status == 'paid' %}selected{% endif %}>Paid</option>
+        </select>
 
-        <input type="submit" value="Actualizar Usuario">
+        <label for="net">Net:</label>
+        <input type="number" id="net" name="purchase_price" value="{{ item.purchase_price }}" required>
+        
+        <label for="price">Price:</label>
+        <input type="number" id="price" name="sale_price" value="{{ item.sale_price }}">
+        
+        <label for="condition">Condición:</label>
+        <input type="text" id="condition" name="condition" value="{{ item.condition }}" required>
+        
+        <label for="date">Fecha:</label>
+        <input type="date" id="date" name="date" value="{{ item.date }}" required>
+        
+        <button type="submit">Actualizar ítem</button>
     </form>
-{% endblock %}
+</div>
