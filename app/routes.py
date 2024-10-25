@@ -8,6 +8,7 @@ import smtplib  # o una librería de email más avanzada
 import sendgrid
 from sendgrid.helpers.mail import Mail
 
+
 load_dotenv()
 
 class database():
@@ -591,7 +592,7 @@ def delete_user(user_id):
 @main_blueprint.route('/logout')
 def logout():
     session.clear()
-    return redirect(url_for('main.login'))
+    return redirect(url_for('main.home'))
 
 
 @main_blueprint.route('/update_profile', methods=['POST'])

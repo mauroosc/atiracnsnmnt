@@ -7,16 +7,15 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav>
+    <nav class="menu">
         <ul>
-            <li><a href="{{ url_for('main.inventory') }}">Inventario</a></li>
+            <li><a href="{{ url_for('main.inventory') }}" class="active">Inventario</a></li>
             <li><a href="{{ url_for('main.payout') }}">Payout</a></li>
             <li><a href="{{ url_for('main.payout_history') }}">Historial de Payout</a></li>
             <li><a href="{{ url_for('main.profile') }}">Perfil</a></li>
             <li><a href="{{ url_for('main.logout') }}">Cerrar sesión</a></li>
         </ul>
     </nav>
-
     <div class="content">
         {% block content %}
         {% endblock %}
