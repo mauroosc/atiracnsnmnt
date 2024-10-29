@@ -5,8 +5,11 @@
     font-family: sans-serif;
 }
 
-body{
+body {
     background: #1e1e1e;
+    margin: 0; /* Asegúrate de que el body no tenga margen */
+    padding: 0;
+    width: 100%; /* Asegúrate de que el body ocupe el 100% del ancho */
 }
 
 button{
@@ -21,6 +24,11 @@ button{
     font-weight: bold;
     width: 100%;
     transition: background .3s;
+}
+
+.container{
+    display: flex;
+    justify-content: center;
 }
 
 h1{
@@ -65,11 +73,13 @@ label{
 
 /* ======= Estilo del Menú ======= */
 .menu {
-    background-color: #333; /* Color de fondo del menú */
-    padding: 10px 0; /* Espaciado en la parte superior e inferior */
-    position: fixed; /* Mantiene el menú fijo en la parte superior */
-    width: 100%; /* Ocupa todo el ancho de la pantalla */
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
+    background-color: #333;
+    padding: 10px 0;
+    position: fixed;
+    width: 70%;
+    z-index: 1000;
+    left: 50%; /* Posiciona el menú a la mitad de la ventana */
+    transform: translateX(-50%); /* Ajusta para centrar */
 }
 
 .menu ul {
@@ -103,8 +113,8 @@ label{
 
 /* ======= Estilo para todas las tablas ======= */
 table {
-    width: 100%; /* Ocupa el ancho completo */
-    margin: 20px 0; /* Espaciado superior e inferior */
+    width: 80%; /* Ocupa el ancho completo */
+    margin: 20px auto; /* Espaciado superior e inferior */
     border-collapse: collapse; /* Colapsa bordes */
     background-color: #2e2e2e; /* Fondo oscuro para la tabla */
 }
@@ -127,4 +137,53 @@ table tr:nth-child(even) {
 
 table tr:hover {
     background-color: #555; /* Color de fondo al pasar el ratón sobre una fila */
+}
+
+
+/* Estilo para el enlace "Edit" */
+.action-link:nth-of-type(1) {
+    color: #00bcd4; /* Color específico para "Edit" */
+    background-color: #00bbd433;
+}
+
+/* Estilo para el enlace "Delete" */
+.action-link:nth-of-type(2) {
+    color: #ff4444; /* Color específico para "Delete" */
+    background-color: #ff44442d;
+}
+
+/* Efecto hover para "Edit" */
+.action-link:nth-of-type(1):hover {
+    background-color: #0097a7; /* Color de fondo diferente al pasar el ratón */
+    color: white; /* Cambia el color del texto al pasar el ratón */
+}
+
+/* Efecto hover para "Delete" */
+.action-link:nth-of-type(2):hover {
+    background-color: #cc0000; /* Color de fondo diferente al pasar el ratón */
+    color: white; /* Cambia el color del texto al pasar el ratón */
+}
+
+/* Estilo común para ambos enlaces */
+.action-link {
+    text-decoration: none; /* Elimina el subrayado */
+    padding: 5px 10px; /* Espaciado interno */
+    border-radius: 5px; /* Bordes redondeados */
+    transition: background-color 0.3s ease; /* Suaviza el cambio de color */
+}
+
+p{
+    text-align: center;
+    padding: 65px 0 0 0;
+    color: #f2f3f5; 
+}
+
+.new-account{
+text-decoration: none;
+padding: 5px 10px;
+border-radius: 5px;
+transition: background-color 0.3s ease;
+Color: white;
+background-color: #008000;
+margin: auto;
 }

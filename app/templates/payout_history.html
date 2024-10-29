@@ -33,7 +33,7 @@
                 <td>{{ item.consignor }}</td>
                 <td>{{ item.date }}</td>
                 <td>
-                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}">Editar</a>
+                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a>
                 </td>
             </tr>
             {% endfor %}
