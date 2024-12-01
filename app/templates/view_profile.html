@@ -4,16 +4,22 @@
 
 {% block content %}
 <div class="profile-container">
-    <!-- Columna izquierda: Información del usuario -->
-    <div class="user-info ">
-        <h2>Perfil de {{ user.name }}</h2>
+    <h2>Perfil de {{ user.name }}</h2>
+
+    <!-- Contenedor para la información del usuario -->
+    <div class="user-info">
         <p><strong>Email:</strong> {{ user.email }}</p>
         <p><strong>Nombre:</strong> {{ user.name }}</p>
     </div>
 
-    <!-- Columna derecha: Items del usuario -->
+    <!-- Botón para agregar un nuevo ítem -->
+    <div class="button-container">
+        <a href="{{ url_for('main.create_item', user_id=user.id) }}" class="new-account">Add New Item</a>
+    </div>
+</div> <!-- Cierre del contenedor profile-container -->
+
+    <!-- Tabla de ítems del usuario -->
     <div class="user-items">
-        <h3>Items de {{ user.name }}</h3>
         <table>
             <thead>
                 <tr>
@@ -40,16 +46,12 @@
                     <td>{{ item.condition }}</td>
                     <td>{{ item.date }}</td>
                     <td>
-                        <a href="{{ url_for('main.edit_item', item_id=item.id) }}">Editar</a> | 
-                        <a href="{{ url_for('main.delete_item', item_id=item.id) }}" onclick="return confirm('¿Estás seguro de eliminar este ítem?');">Eliminar</a>
+                        <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a> | 
+                        <a href="{{ url_for('main.delete_item', item_id=item.id) }}" class="action-link" onclick="return confirm('¿Estás seguro de eliminar este ítem?');">Eliminar</a>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
-
-        <!-- Botón para agregar un nuevo ítem -->
-        <a href="{{ url_for('main.create_item', user_id=user.id) }}" class="btn">Add New Item</a>
     </div>
-</div>
 {% endblock %}

@@ -9,11 +9,21 @@
 <body>
     <nav class="menu">
         <ul>
-            <li><a href="{{ url_for('main.inventory') }}" class="active">Inventario</a></li>
-            <li><a href="{{ url_for('main.payout') }}">Payout</a></li>
-            <li><a href="{{ url_for('main.payout_history') }}">Historial de Payout</a></li>
-            <li><a href="{{ url_for('main.profile') }}">Perfil</a></li>
-            <li><a href="{{ url_for('main.logout') }}">Cerrar sesión</a></li>
+            <li class="{% if request.endpoint == 'main.inventory' %}active{% endif %}">
+                <a href="{{ url_for('main.inventory') }}">Inventory</a>
+            </li>
+            <li class="{% if request.endpoint == 'main.payout' %}active{% endif %}">
+                <a href="{{ url_for('main.payout') }}">Payout</a>
+            </li>
+            <li class="{% if request.endpoint == 'main.payout_history' %}active{% endif %}">
+                <a href="{{ url_for('main.payout_history') }}">Payout history</a>
+            </li>
+            <li class="{% if request.endpoint == 'main.profile' %}active{% endif %}">
+                <a href="{{ url_for('main.profile') }}">Profile</a>
+            </li>
+            <li class="{% if request.endpoint == 'main.logout' %}active{% endif %}">
+                <a href="{{ url_for('main.logout') }}">Log out</a>
+            </li>
         </ul>
     </nav>
     <div class="content">

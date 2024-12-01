@@ -12,12 +12,18 @@
                 <th>Color</th>
                 <th>Talle</th>
                 <th>Status</th>
+                {% if is_admin %}
                 <th>Net</th>
+                {% endif %}
                 <th>Price</th>
                 <th>Condición</th>
+                {% if is_admin %}
                 <th>Consignor</th>
+                {% endif %}
                 <th>Fecha</th>
+                {% if is_admin %}
                 <th>Acciones</th>
+                {% endif %}
             </tr>
         </thead>
         <tbody>
@@ -27,14 +33,20 @@
                 <td>{{ item.color }}</td>
                 <td>{{ item.size }}</td>
                 <td>{{ item.status }}</td>
+                {% if is_admin %}
                 <td>{{ item.net }}</td>
+                {% endif %}
                 <td>{{ item.price }}</td>
                 <td>{{ item.condition }}</td>
+                {% if is_admin %}
                 <td>{{ item.consignor }}</td>
+                {% endif %}
                 <td>{{ item.date }}</td>
+                {% if is_admin %}
                 <td>
                     <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a>
                 </td>
+                {% endif %}
             </tr>
             {% endfor %}
         </tbody>

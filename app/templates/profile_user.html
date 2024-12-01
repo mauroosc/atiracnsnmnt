@@ -3,22 +3,23 @@
 {% block title %}Perfil de Usuario{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <h2>Perfil de {{ user.name }}</h2>
+<div class="profile-container">
+    <h2 lass="info-user">Perfil de {{ user.name }}</h2>
 
-    <!-- Mostrando el nombre y el email del usuario sin usar inputs -->
+    <!-- Contenedor para la información del usuario -->
     <div class="user-info">
         <p><strong>Email:</strong> {{ user.email }}</p>
         <p><strong>Nombre:</strong> {{ user.name }}</p>
     </div>
 
     <!-- Botón para abrir el formulario de cambio de contraseña -->
-    <button type="button" class="btn" id="change-password-btn">Cambiar Contraseña</button>
-
+    <div class="button-container">
+    <button type="button"  id="change-password-btn">Cambiar Contraseña</button>
+    </div>
+</div>
     <!-- Formulario de cambio de contraseña (inicialmente oculto) -->
     <div id="change-password-form" style="display: none; margin-top: 20px;">
-        <h3>Cambiar Contraseña</h3>
-        <form action="{{ url_for('main.change_password') }}" method="POST">
+        <form action="{{ url_for('main.change_password') }}" method="POST" class="form_edit">
             <label for="current_password">Contraseña Actual:</label>
             <input type="password" id="current_password" name="current_password" required>
 
@@ -28,16 +29,15 @@
             <label for="confirm_password">Confirmar Nueva Contraseña:</label>
             <input type="password" id="confirm_password" name="confirm_password" required>
 
-            <button type="submit" class="btn">Actualizar Contraseña</button>
+            <button type="submit">Actualizar Contraseña</button>
         </form>
-    </div>
 </div>
 
 <script>
     // Mostrar/ocultar el formulario de cambio de contraseña al hacer clic en el botón
     document.getElementById('change-password-btn').addEventListener('click', function() {
         const form = document.getElementById('change-password-form');
-        if (form.style.display === 'none') {
+        if (form.style.display === 'none' || form.style.display === '') {
             form.style.display = 'block';
         } else {
             form.style.display = 'none';

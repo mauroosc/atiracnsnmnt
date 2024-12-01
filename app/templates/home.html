@@ -1,4 +1,4 @@
-<!-- login.html -->
+<!-- home.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,33 +9,34 @@
 </head>
 
 <body>
-    <h1>
-        Atira consignment
-    </h1>
+    <h1>Atira consignment</h1>
+    
     <form class="login-form" action="{{ url_for('main.login') }}" method="POST">
-        <h2>
-            Welcome, please login
-        </h2>
-        <div>
-            <!-- Mostrar mensaje flash -->
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                    <div class="alert">
-                        {{ messages[0] }}
-                    </div>
-                {% endif %}
-            {% endwith %}
-        </div>
-        <div class="form_input"> 
+        <h2>Welcome, please login</h2>
+        
+        <!-- Mostrar mensaje flash -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="alert">
+                    {% for category, message in messages %}
+                        <div class="{{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="form_input">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" required class="input-field">
         </div>
+
         <div class="form_input">
             <label for="password">Password:</label>
             <input type="password" id="password" name="password" required class="input-field">
         </div>
+
         <div class="form_input">
-            <button type="submit">sign in</button>
+            <button type="submit">Sign in</button>
         </div>
     </form>
 </body>

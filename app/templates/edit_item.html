@@ -3,17 +3,15 @@
 {% block title %}Editar ítem{% endblock %}
 
 {% block content %}
-<div class="edit-item-container">
-    <h2>Editar ítem</h2>
-    <form action="{{ url_for('main.edit_item', item_id=item.id) }}" method="POST">
+<div class="item-container">
+    <h2>Editar ítem para {{ item.name }}</h2>
+
+    <form action="{{ url_for('main.edit_item', item_id=item.id) }}" class="form-edit" method="POST">
         <label for="name">Nombre del ítem:</label>
-        <input type="text" id="name" name="name" value="{{ item.name }}" required>
+        <input type="text" id="name" name="name" value="{{ item.name }}" required><br>
 
-        <label for="color">Color:</label>
-        <input type="text" id="color" name="color" value="{{ item.color }}" required>
-
-        <label for="size">Talle:</label>
-        <input type="text" id="size" name="size" value="{{ item.size }}" required>
+        <label for="details">Detalles:</label>
+        <input type="text" id="details" name="details" value="{{ item.details }}" required><br>  <!-- Cambié textarea por input -->
 
         <label for="status">Estado:</label>
         <select id="status" name="status" required>
@@ -21,21 +19,18 @@
             <option value="sold" {% if item.status == 'sold' %}selected{% endif %}>Sold</option>
             <option value="paid" {% if item.status == 'paid' %}selected{% endif %}>Paid</option>
             <option value="retired" {% if item.status == 'retired' %}selected{% endif %}>Retired</option>
-        </select>
+        </select><br>
 
         <label for="net">Net:</label>
-        <input type="number" id="net" name="purchase_price" value="{{ item.net }}" required>
+        <input type="number" id="net" name="net" value="{{ item.net }}" required><br>
 
         <label for="price">Price:</label>
-        <input type="number" id="price" name="sale_price" value="{{ item.price }}">
-
+        <input type="number" id="price" name="price" value="{{ item.price }}"><br>
+      
         <label for="condition">Condición:</label>
-        <input type="text" id="condition" name="condition" value="{{ item.condition }}" required>
+        <input type="text" id="condition" name="condition" value="{{ item.condition }}" required><br>
 
-        <label for="date">Fecha:</label>
-        <input type="date" id="date" name="date" value="{{ item.date }}" required>
-
-        <button type="submit">Actualizar ítem</button>
+        <button type="submit" class="btn">Actualizar ítem</button>
     </form>
 </div>
 {% endblock %}

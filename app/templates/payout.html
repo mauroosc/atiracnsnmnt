@@ -12,12 +12,14 @@
                 <th>Color</th>
                 <th>Talle</th>
                 <th>Status</th>
+                {% if is_admin %}
                 <th>Net</th>
+                <th>Consignor</th>
+                <th>Acciones</th>
+                {% endif %}
                 <th>Price</th>
                 <th>Condición</th>
-                <th>Consignor</th>
                 <th>Fecha</th>
-                <th>Acciones</th> <!-- Nueva columna para el botón de editar -->
             </tr>
         </thead>
         <tbody>
@@ -27,19 +29,22 @@
                 <td>{{ item.color }}</td>
                 <td>{{ item.size }}</td>
                 <td>{{ item.status }}</td>
+                {% if is_admin %}
                 <td>{{ item.net }}</td>
-                <td>{{ item.price }}</td>
-                <td>{{ item.condition }}</td>
                 <td>{{ item.consignor }}</td>
-                <td>{{ item.date }}</td>
                 <td>
                     <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a> <!-- Botón para editar -->
+                    <a href="{{ url_for('main.delete_item', item_id=item.id) }}" class="action-link" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
                 </td>
+                {% endif %}
+                <td>{{ item.price }}</td>
+                <td>{{ item.condition }}</td>
+                <td>{{ item.date }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>   
     {% else %}
-        <p>No items found.</p>
+        <p>No items found in payout.</p>
     {% endif %}
 {% endblock %}

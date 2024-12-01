@@ -5,8 +5,8 @@ from dotenv import load_dotenv
 import os
 from itsdangerous import URLSafeTimedSerializer
 import smtplib  # o una librería de email más avanzada
-import sendgrid
-from sendgrid.helpers.mail import Mail
+from mailjet_rest import Client
+import re
 
 
 load_dotenv()
@@ -26,39 +26,104 @@ class database():
 
 database_api = database()
 
-# Configuración de SendGrid
+def send_email(subject, item_name, to_email):
+    # Usar directamente las variables de entorno
+    api_key = os.getenv("MAILJET_API_KEY")
+    api_secret = os.getenv("MAILJET_API_SECRET")
 
-SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
-FROM_EMAIL = os.getenv("FROM_EMAIL")
+    if not api_key or not api_secret:
+        print("MAILJET_API_KEY o MAILJET_API_SECRET no encontrados.")
+        return
 
-def send_email(to_email, subject, body):
-    message = Mail(
-        from_email=FROM_EMAIL,
-        to_emails=to_email,
-        subject=subject,
-        html_content=body  # Usamos el contenido HTML que llega como argumento
-    )
-    
-    try:
-        sg = sendgrid.SendGridAPIClient(SENDGRID_API_KEY)
-        response = sg.send(message)
-        print(response.status_code)
-        print(response.body)
-        print(response.headers)
-    except Exception as e:
-        print(f"Error enviando el correo: {e}")
+    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+
+    # Estilo inline para el email
+    html_content = f"""
+    <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                    color: #333;
+                }}
+                .container {{
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                }}
+                h1 {{
+                    color: #4CAF50;
+                    text-align: center;
+                }}
+                p {{
+                    font-size: 16px;
+                    margin-bottom: 15px;
+                }}
+                .footer {{
+                    text-align: center;
+                    font-size: 14px;
+                    color: #777;
+                    margin-top: 20px;
+                }}
+                .footer a {{
+                    color: #4CAF50;
+                    text-decoration: none;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>¡Felicidades!</h1>
+                <p>Nos complace informarte que tu ítem <strong>{item_name}</strong> ha sido vendido. Solicita un turno para coordinar el pago.</p>
+                <p>Gracias por confiar en nosotros.</p>
+                <div class="footer">
+                    <p>Atira Consignment - Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": "airplugventas@gmail.com",
+                    "Name": "Atira Consignment"
+                },
+                "To": [
+                    {
+                        "Email": to_email
+                    }
+                ],
+                "Subject": subject,
+                "HTMLPart": html_content
+            }
+        ]
+    }
+
+    result = mailjet.send.create(data=data)
+    if result.status_code == 200:
+        print("Email sent successfully!")
+    else:
+        print(f"Error sending email: {result.status_code}, {result.text}")
+
 
 
 
 # Flask Blueprint
 main_blueprint = Blueprint('main', __name__)
 
-
-
 @main_blueprint.route('/')
 def home():
     return render_template('home.html')
-
 
 @main_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
@@ -90,14 +155,14 @@ def login():
                 else:
                     session['user_type'] = 'user'
                 
-                return redirect(url_for('main.inventory'))
+                return redirect(url_for('main.inventory'))  # Redirige a la página de inventario u otra página relevante
             else:
-                flash('Email or password was incorrect')
+                flash('Email or password was incorrect', 'error')
         else:
-            flash('Email or password was incorrect')
+            flash('Email or password was incorrect', 'error')
 
-    return render_template('login.html')
-
+    # Si no es un POST o si hay un error en el login, se redirige a la misma página (home)
+    return render_template('home.html')
 
 @main_blueprint.route('/inventory')
 def inventory():
@@ -140,8 +205,6 @@ def inventory():
     database_api.desconectar()
 
     return render_template('inventory.html', items=items_dict, is_admin=is_admin)
-
-
 
 @main_blueprint.route('/view_profile/<int:user_id>')
 def view_profile(user_id):
@@ -212,27 +275,28 @@ def create_item(user_id):
             if request.method == 'POST':
                 # Recoge los datos del formulario
                 name = request.form.get('name')
-                color = request.form.get('color')
-                size = request.form.get('size')
+                details = request.form.get('details')  # Nuevo campo Details
                 status = request.form.get('status')
                 net = request.form.get('net')  # Cambiado a 'net'
                 price = request.form.get('price')  # Cambiado a 'price'
                 condition = request.form.get('condition')
-                date = request.form.get('date')
+
+                # Obtener la fecha actual (se elimina el campo de "date")
+                date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
                 # Verificar que todos los campos obligatorios estén presentes
-                if not (name and color and size and status and net and condition and date):
+                if not (name and details and status and net and condition and price):
                     flash('Todos los campos obligatorios deben ser completados.')
                     return redirect(url_for('main.create_item', user_id=user_id))
 
                 # Insertar un nuevo ítem en la base de datos (AJUSTAR el orden de los campos)
                 try:
                     query_insert = """
-                    INSERT INTO items (user_id, name, color, size, status, net, price, condition, date, user_email)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO items (user_id, name, details, status, net, price, condition, date, user_email)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     database_api.db.execute(query_insert, (
-                        user_id, name, color, size, status, net, price, condition, date, user['email']
+                        user_id, name, details, status, net, price, condition, date, user['email']
                     ))
                     database_api.desconectar()
 
@@ -267,8 +331,7 @@ def edit_item(item_id):
             item = {
                 'id': item_to_edit[0],
                 'name': item_to_edit[2],
-                'color': item_to_edit[3],
-                'size': item_to_edit[4],
+                'details': item_to_edit[10],  # Asegúrate de que este campo está en la posición correcta (según tu modelo)
                 'status': item_to_edit[5],
                 'net': item_to_edit[6],
                 'price': item_to_edit[7],
@@ -279,9 +342,10 @@ def edit_item(item_id):
 
             if request.method == 'POST':
                 try:
-                    print("Datos del formulario recibidos:", request.form)
+                    # Recoge los datos del formulario, incluyendo el campo details
+                    details = request.form.get('details')  # Recoger 'details' correctamente
 
-                    # Conversión explícita de precios a float
+                    # Convertir los precios a tipo float
                     try:
                         purchase_price = float(request.form['purchase_price'])
                         sale_price = float(request.form['sale_price']) if request.form['sale_price'] else None
@@ -295,34 +359,23 @@ def edit_item(item_id):
                     # Actualizar los datos del ítem en la base de datos
                     query_update = """
                     UPDATE items
-                    SET name = %s, color = %s, size = %s, status = %s, net = %s, price = %s, condition = %s, date = %s
+                    SET name = %s, details = %s, status = %s, net = %s, price = %s, condition = %s, date = CURRENT_DATE
                     WHERE id = %s
                     """
-                    # Añadir impresión para la consulta y los valores
-                    print(f"Ejecutando consulta SQL: {query_update}")
-                    print(f"Con valores: {(request.form['name'], request.form['color'], request.form['size'], new_status, purchase_price, sale_price, request.form['condition'], request.form['date'], item_id)}")
-
                     database_api.db.execute(query_update, (
                         request.form['name'],
-                        request.form['color'],
-                        request.form['size'],
+                        details,
                         new_status,
                         purchase_price,
                         sale_price,
                         request.form['condition'],
-                        request.form['date'],
                         item_id
                     ))
 
                     # Verificar si el estado ha cambiado a "sold"
                     if previous_status != 'sold' and new_status == 'sold':
                         subject = "Tu ítem ha sido vendido"
-                        body = f"""
-                            <p>Hola,</p>
-                            <p>Nos complace informarte que tu ítem <strong>{item['name']}</strong> ha sido vendido.</p>
-                            <p>Gracias por confiar en nosotros.</p>
-                        """
-                        send_email(item['user_email'], subject, body)
+                        send_email(subject, item['name'], item['user_email'])
 
                     database_api.desconectar()
                     return redirect(url_for('main.inventory'))
@@ -338,8 +391,6 @@ def edit_item(item_id):
             return redirect(url_for('main.inventory'))
     else:
         return redirect(url_for('main.login'))
-    
-
 
 
 
@@ -395,23 +446,24 @@ def payout():
                 'price': item[7],  # Asegúrate de que este campo es 'price'
                 'condition': item[8],
                 'date': item[9],
-                'consignor': item[1]  
+                'consignor': item[1]  # Asegúrate de que este campo es 'consignor'
             }
             items_dict.append(item_dict)
 
         database_api.desconectar()
 
-        return render_template('payout.html', items=items_dict)
+        # Pasamos la variable 'is_admin' a la plantilla
+        return render_template('payout.html', items=items_dict, is_admin=session.get('is_admin', False))
     else:
         return redirect(url_for('main.login'))
-
-
-
 
 @main_blueprint.route('/payout_history')
 def payout_history():
     if 'user_type' in session:
-        if session['is_admin']:
+        # Comprobamos si el usuario es admin
+        is_admin = session.get('is_admin', False)
+        
+        if is_admin:
             # Obtener todos los ítems con estado 'paid'
             database_api.conectar()
             query = "SELECT * FROM items WHERE status = 'paid'"
@@ -444,10 +496,10 @@ def payout_history():
             }
             items_dict.append(item_dict)
 
-        return render_template('payout_history.html', items=items_dict)
+        # Pasamos `is_admin` a la plantilla para que se pueda usar en el HTML
+        return render_template('payout_history.html', items=items_dict, is_admin=is_admin)
     else:
         return redirect(url_for('main.login'))
-
 
 @main_blueprint.route('/profile')
 def profile():
@@ -478,21 +530,30 @@ def profile_admin():
     else:
         return redirect(url_for('main.login'))
 
-
-
 @main_blueprint.route('/profile_user')
 def profile_user():
-    if 'user_type' in session and not session['is_admin']:
-        user_email = session['user']
+    if 'user_type' in session and session['user_type'] == 'user':
+        user_email = session['user']  # Obtiene el email del usuario de la sesión
         database_api.conectar()
 
-        query = "SELECT * FROM users WHERE email = %s"
+        # Obtener información del usuario basado en el email
+        query = "SELECT id, email, name FROM users WHERE email = %s"
         database_api.db.execute(query, (user_email,))
         user_profile = database_api.db.fetchone()
 
         database_api.desconectar()
 
-        return render_template('profile_user.html', user=user_profile)
+        if user_profile:  # Verifica que se haya encontrado el usuario
+            # Descomponer la tupla en un diccionario
+            user = {
+                'id': user_profile[0],
+                'email': user_profile[1],
+                'name': user_profile[2]
+            }
+            return render_template('profile_user.html', user=user)
+        else:
+            flash('Usuario no encontrado.')
+            return redirect(url_for('main.login'))
     else:
         return redirect(url_for('main.login'))
 
@@ -521,7 +582,6 @@ def create_user():
         return render_template('create_user.html')
     else:
         return redirect(url_for('main.login'))
-
 
 @main_blueprint.route('/edit_user/<int:user_id>', methods=['GET', 'POST'])
 def edit_user(user_id):
@@ -566,7 +626,6 @@ def edit_user(user_id):
     else:
         return redirect(url_for('main.login'))
 
-
 @main_blueprint.route('/delete_user/<int:user_id>')
 def delete_user(user_id):
     if 'user_type' in session and session['is_admin']:
@@ -594,7 +653,6 @@ def logout():
     session.clear()
     return redirect(url_for('main.home'))
 
-
 @main_blueprint.route('/update_profile', methods=['POST'])
 def update_profile():
     if 'user_type' in session and session['user_type'] == 'user':
@@ -618,7 +676,6 @@ def update_profile():
         return redirect(url_for('main.profile_user'))
     else:
         return redirect(url_for('main.login'))
-
 
 @main_blueprint.route('/change_password', methods=['GET', 'POST'])
 def change_password():
