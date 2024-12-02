@@ -9,19 +9,13 @@
         <thead>
             <tr>
                 <th>Nombre</th>
-                <th>Color</th>
-                <th>Talle</th>
+                <th>Details</th>
                 <th>Status</th>
-                {% if is_admin %}
-                <th>Net</th>
-                {% endif %}
                 <th>Price</th>
-                <th>Condición</th>
-                {% if is_admin %}
-                <th>Consignor</th>
-                {% endif %}
                 <th>Fecha</th>
                 {% if is_admin %}
+                <th>Net</th>
+                <th>Consignor</th>
                 <th>Acciones</th>
                 {% endif %}
             </tr>
@@ -30,21 +24,16 @@
             {% for item in items %}
             <tr>
                 <td>{{ item.name }}</td>
-                <td>{{ item.color }}</td>
-                <td>{{ item.size }}</td>
+                <td>{{ item.details }}</td>
                 <td>{{ item.status }}</td>
-                {% if is_admin %}
-                <td>{{ item.net }}</td>
-                {% endif %}
                 <td>{{ item.price }}</td>
-                <td>{{ item.condition }}</td>
-                {% if is_admin %}
-                <td>{{ item.consignor }}</td>
-                {% endif %}
                 <td>{{ item.date }}</td>
                 {% if is_admin %}
+                <td>{{ item.net }}</td>
+                <td>{{ item.consignor }}</td>
                 <td>
-                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a>
+                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a> <!-- Botón para editar -->
+                    <a href="{{ url_for('main.delete_item', item_id=item.id) }}" class="action-link" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
                 </td>
                 {% endif %}
             </tr>

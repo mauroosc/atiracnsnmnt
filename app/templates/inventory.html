@@ -4,22 +4,24 @@
 
 {% block content %}
     <h2>Inventory</h2>
-    <table>
+
+    <!-- Barra de búsqueda -->
+    <div class="search-container">
+        <input type="text" id="search-input" placeholder="Buscar ítem..." onkeyup="searchItems()">
+    </div>
+
+    <table id="items-table">
         <thead>
             <tr>
-                <th>Name</th>
+                <th>Nombre</th>
                 <th>Details</th>
                 <th>Status</th>
+                <th>Price</th>
+                <th>Fecha</th>
                 {% if is_admin %}
                 <th>Net</th>
-                {% endif %}
-                <th>Price</th>
-                <th>Condition</th>
-                {% if is_admin %}
                 <th>Consignor</th>
-                {% endif %}
-                {% if is_admin %}
-                <th>Actions</th>
+                <th>Acciones</th>
                 {% endif %}
             </tr>
         </thead>
@@ -29,17 +31,13 @@
                 <td>{{ item.name }}</td>
                 <td>{{ item.details }}</td>
                 <td>{{ item.status }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.date }}</td>
                 {% if is_admin %}
                 <td>{{ item.net }}</td>
-                {% endif %}
-                <td>{{ item.price }}</td>                
-                <td>{{ item.condition }}</td>
-                {% if is_admin %}
                 <td>{{ item.consignor }}</td>
-                {% endif %}
-                {% if is_admin %}
                 <td>
-                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Edit</a> | 
+                    <a href="{{ url_for('main.edit_item', item_id=item.id) }}" class="action-link">Editar</a> <!-- Botón para editar -->
                     <a href="{{ url_for('main.delete_item', item_id=item.id) }}" class="action-link" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
                 </td>
                 {% endif %}
@@ -47,5 +45,28 @@
             {% endfor %}
         </tbody>
     </table>
+
+    <!-- Script para búsqueda -->
+    <script>
+        function searchItems() {
+            const input = document.getElementById('search-input');
+            const filter = input.value.toLowerCase();
+            const table = document.getElementById('items-table');
+            const tr = table.getElementsByTagName('tr');
+
+            // Iterar a través de todas las filas de la tabla
+            for (let i = 1; i < tr.length; i++) {  // Empezamos desde 1 para evitar el encabezado
+                let td = tr[i].getElementsByTagName('td')[0];  // Buscar por el primer <td> (el nombre del ítem)
+                if (td) {
+                    let txtValue = td.textContent || td.innerText;
+                    if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                        tr[i].style.display = '';  // Mostrar fila
+                    } else {
+                        tr[i].style.display = 'none';  // Ocultar fila
+                    }
+                }       
+            }
+        }
+    </script>
 
 {% endblock %}

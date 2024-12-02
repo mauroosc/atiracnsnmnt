@@ -7,7 +7,9 @@ from itsdangerous import URLSafeTimedSerializer
 import smtplib  # o una librería de email más avanzada
 from mailjet_rest import Client
 import re
-
+from werkzeug.security import generate_password_hash
+import csv
+from datetime import datetime
 
 load_dotenv()
 
@@ -115,6 +117,90 @@ def send_email(subject, item_name, to_email):
     else:
         print(f"Error sending email: {result.status_code}, {result.text}")
 
+# Función para enviar correo de restablecimiento de contraseña
+def send_reset_email(to_email, token):
+    reset_url = url_for('main.reset_password', token=token, _external=True)
+    subject = "Restablecer tu contraseña"
+    html_content = f"""
+    <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 0;
+                    color: #333;
+                }}
+                .container {{
+                    width: 100%;
+                    max-width: 600px;
+                    margin: 0 auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                }}
+                h1 {{
+                    color: #4CAF50;
+                    text-align: center;
+                }}
+                p {{
+                    font-size: 16px;
+                    margin-bottom: 15px;
+                }}
+                .footer {{
+                    text-align: center;
+                    font-size: 14px;
+                    color: #777;
+                    margin-top: 20px;
+                }}
+                .footer a {{
+                    color: #4CAF50;
+                    text-decoration: none;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>¡Has solicitado restablecer tu contraseña!</h1>
+                <p>Para restablecer tu contraseña, haz clic en el siguiente enlace:</p>
+                <p><a href="{reset_url}">Restablecer mi contraseña</a></p>
+                <p>Si no solicitaste este cambio, puedes ignorar este mensaje.</p>
+                <div class="footer">
+                    <p>Atira Consignment - Todos los derechos reservados.</p>
+                </div>
+            </div>
+        </body>
+    </html>
+    """
+
+    data = {
+        'Messages': [
+            {
+                "From": {
+                    "Email": "airplugventas@gmail.com",
+                    "Name": "Atira Consignment"
+                },
+                "To": [
+                    {
+                        "Email": to_email
+                    }
+                ],
+                "Subject": subject,
+                "HTMLPart": html_content
+            }
+        ]
+    }
+
+    mailjet = Client(auth=(os.getenv("MAILJET_API_KEY"), os.getenv("MAILJET_API_SECRET")), version='v3.1')
+    result = mailjet.send.create(data=data)
+
+    if result.status_code == 200:
+        print("Reset email sent successfully!")
+    else:
+        print(f"Error sending reset email: {result.status_code}, {result.text}")
+
 
 
 
@@ -164,7 +250,7 @@ def login():
     # Si no es un POST o si hay un error en el login, se redirige a la misma página (home)
     return render_template('home.html')
 
-@main_blueprint.route('/inventory')
+@main_blueprint.route('/inventory', methods=['GET', 'POST'])
 def inventory():
     if 'user' not in session:
         return redirect(url_for('main.login'))
@@ -174,13 +260,15 @@ def inventory():
 
     database_api.conectar()
 
+    search_query = ""
+    if request.method == 'POST':
+        search_query = request.form.get('search_query', '').strip()
+
     if is_admin:
-        # Obtener todos los ítems excepto aquellos en estado 'sold' o 'paid'
-        query = "SELECT * FROM items WHERE status NOT IN ('sold', 'paid')"
-        database_api.db.execute(query)
+        query = "SELECT * FROM items WHERE name ILIKE %s AND status NOT IN ('sold', 'paid')"
+        database_api.db.execute(query, ('%' + search_query + '%',))
         user_items = database_api.db.fetchall()
     else:
-        # Obtener solo los ítems del usuario logueado, excepto aquellos en estado 'sold' o 'paid'
         query = "SELECT * FROM items WHERE user_email = %s AND status NOT IN ('sold', 'paid')"
         database_api.db.execute(query, (user_email,))
         user_items = database_api.db.fetchall()
@@ -189,16 +277,16 @@ def inventory():
     items_dict = []
     for item in user_items:
         item_dict = {
-            'id': item[0],  # Ajusta los índices según tu tabla
+            'id': item[0],
             'name': item[2],
             'color': item[3],
             'size': item[4],
             'status': item[5],
-            'net': item[6],  # Cambiado a 'net'
-            'price': item[7],  # Cambiado a 'price'
+            'net': item[6],
+            'price': item[7],
             'condition': item[8],
             'date': item[9],
-            'consignor': item[1]  # Asegúrate que este campo existe en la base de datos
+            'consignor': item[1]
         }
         items_dict.append(item_dict)
 
@@ -275,28 +363,37 @@ def create_item(user_id):
             if request.method == 'POST':
                 # Recoge los datos del formulario
                 name = request.form.get('name')
-                details = request.form.get('details')  # Nuevo campo Details
+                details = request.form.get('details')
                 status = request.form.get('status')
                 net = request.form.get('net')  # Cambiado a 'net'
                 price = request.form.get('price')  # Cambiado a 'price'
-                condition = request.form.get('condition')
+                condition = request.form.get('condition')  # Cambiado a 'condition'
 
-                # Obtener la fecha actual (se elimina el campo de "date")
-                date = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                # Validar que todos los campos obligatorios estén completos
+                missing_fields = []
+                if not name:
+                    missing_fields.append("Nombre")
+                if not net:
+                    missing_fields.append("Net")
+                if not status:
+                    missing_fields.append("Estado")
+                if not condition:
+                    missing_fields.append("Condición")
+                if not details:
+                    missing_fields.append("Detalles")
 
-                # Verificar que todos los campos obligatorios estén presentes
-                if not (name and details and status and net and condition and price):
-                    flash('Todos los campos obligatorios deben ser completados.')
+                if missing_fields:
+                    flash(f"Por favor completa los siguientes campos: {', '.join(missing_fields)}.", "error")
                     return redirect(url_for('main.create_item', user_id=user_id))
 
                 # Insertar un nuevo ítem en la base de datos (AJUSTAR el orden de los campos)
                 try:
                     query_insert = """
-                    INSERT INTO items (user_id, name, details, status, net, price, condition, date, user_email)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                    INSERT INTO items (user_id, name, details, status, net, price, condition, user_email)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """
                     database_api.db.execute(query_insert, (
-                        user_id, name, details, status, net, price, condition, date, user['email']
+                        user_id, name, details, status, net, price, condition, user['email']
                     ))
                     database_api.desconectar()
 
@@ -316,6 +413,7 @@ def create_item(user_id):
         return redirect(url_for('main.login'))
 
 
+
 @main_blueprint.route('/edit_item/<int:item_id>', methods=['GET', 'POST'])
 def edit_item(item_id):
     if 'user_type' in session and session['user_type'] == 'admin':
@@ -330,22 +428,20 @@ def edit_item(item_id):
             # Convertimos la tupla en un diccionario
             item = {
                 'id': item_to_edit[0],
-                'name': item_to_edit[2],
-                'details': item_to_edit[10],  # Asegúrate de que este campo está en la posición correcta (según tu modelo)
-                'status': item_to_edit[5],
-                'net': item_to_edit[6],
-                'price': item_to_edit[7],
-                'condition': item_to_edit[8],
-                'date': item_to_edit[9],
-                'user_email': item_to_edit[1]
+                'name': item_to_edit[2],  # Nombre del ítem
+                'details': item_to_edit[3],  # Detalles del ítem
+                'status': item_to_edit[4],
+                'net': item_to_edit[5],
+                'price': item_to_edit[6],
+                'condition': item_to_edit[7],
+                'user_email': item_to_edit[8]  # El email del consignador
             }
 
             if request.method == 'POST':
                 try:
-                    # Recoge los datos del formulario, incluyendo el campo details
-                    details = request.form.get('details')  # Recoger 'details' correctamente
+                    print("Datos del formulario recibidos:", request.form)
 
-                    # Convertir los precios a tipo float
+                    # Conversión explícita de precios a float
                     try:
                         purchase_price = float(request.form['purchase_price'])
                         sale_price = float(request.form['sale_price']) if request.form['sale_price'] else None
@@ -353,44 +449,39 @@ def edit_item(item_id):
                         flash('Formato inválido en el campo de precios')
                         return redirect(url_for('main.edit_item', item_id=item_id))
 
-                    previous_status = item_to_edit[5]
-                    new_status = request.form['status']
-
                     # Actualizar los datos del ítem en la base de datos
                     query_update = """
                     UPDATE items
-                    SET name = %s, details = %s, status = %s, net = %s, price = %s, condition = %s, date = CURRENT_DATE
+                    SET name = %s, details = %s, status = %s, net = %s, price = %s, condition = %s
                     WHERE id = %s
                     """
                     database_api.db.execute(query_update, (
                         request.form['name'],
-                        details,
-                        new_status,
+                        request.form['details'],
+                        request.form['status'],
                         purchase_price,
                         sale_price,
                         request.form['condition'],
                         item_id
                     ))
 
-                    # Verificar si el estado ha cambiado a "sold"
-                    if previous_status != 'sold' and new_status == 'sold':
-                        subject = "Tu ítem ha sido vendido"
-                        send_email(subject, item['name'], item['user_email'])
-
                     database_api.desconectar()
+                    flash("Ítem actualizado con éxito.")
                     return redirect(url_for('main.inventory'))
 
                 except Exception as e:
-                    print(f"Error al actualizar el ítem: {str(e)}")
                     database_api.desconectar()
-                    return "Error en la actualización del ítem", 400
+                    flash(f"Error al actualizar el ítem. Por favor, inténtalo más tarde. Error: {str(e)}")
+                    return redirect(url_for('main.edit_item', item_id=item_id))
 
             return render_template('edit_item.html', item=item)
 
         else:
+            flash('El ítem no existe o ha sido eliminado.')
             return redirect(url_for('main.inventory'))
     else:
         return redirect(url_for('main.login'))
+
 
 
 
@@ -726,3 +817,230 @@ def change_password():
     return render_template('change_password.html')
 
 
+# Modificación en la ruta /forgot_password para separar el correo de restablecimiento
+@main_blueprint.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if request.method == 'POST':
+        email = request.form['email']
+        
+        # Verificar si el email existe en la base de datos
+        database_api.conectar()
+        query = "SELECT id, email FROM users WHERE email = %s"
+        database_api.db.execute(query, (email,))
+        user = database_api.db.fetchone()
+
+        if user:
+            # Generar el token para restablecer la contraseña
+            s = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
+            token = s.dumps(email, salt=os.getenv("SECURITY_PASSWORD_SALT"))
+
+            # Enviar el correo con el enlace de restablecimiento
+            send_reset_email(email, token)
+
+            flash("Te hemos enviado un correo con el enlace para restablecer tu contraseña.", "success")
+        else:
+            flash("Este correo no está registrado.", "error")
+
+        database_api.desconectar()
+        return redirect(url_for('main.home'))
+
+    return render_template('forgot_password.html')
+
+@main_blueprint.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    try:
+        s = URLSafeTimedSerializer(os.getenv("SECRET_KEY"))
+        email = s.loads(token, salt=os.getenv("SECURITY_PASSWORD_SALT"), max_age=3600)  # El token es válido por 1 hora
+
+        if request.method == 'POST':
+            new_password = request.form['password']
+            
+            # Verificar que la contraseña sea válida (por ejemplo, longitud mínima)
+            if len(new_password) < 6:
+                flash('La contraseña debe tener al menos 6 caracteres', 'error')
+                return render_template('reset_password.html', token=token)
+
+            # Actualizar la contraseña en la base de datos
+            hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+            database_api.conectar()
+
+            query = "UPDATE users SET password = %s WHERE email = %s"
+            database_api.db.execute(query, (hashed_password, email))
+            database_api.desconectar()
+
+            flash('Tu contraseña ha sido actualizada con éxito.', 'success')
+            return redirect(url_for('main.home'))
+
+        return render_template('reset_password.html', token=token)
+    except Exception as e:
+        flash('El enlace de restablecimiento ha expirado o no es válido.', 'error')
+        return redirect(url_for('main.home'))
+
+@main_blueprint.route('/import_items/<int:user_id>', methods=['POST'])
+def import_items(user_id):
+    if 'user_type' in session and session['user_type'] == 'admin':
+        if 'file' not in request.files:
+            flash('No file selected')
+            return redirect(url_for('main.view_profile', user_id=user_id))
+
+        file = request.files['file']
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(url_for('main.view_profile', user_id=user_id))
+
+        if file and file.filename.endswith('.csv'):
+            try:
+                # Procesar el archivo CSV
+                items_created = 0
+                csv_file = csv.reader(file.stream.read().decode('utf-8').splitlines())
+                next(csv_file)  # Skip header row
+                for row in csv_file:
+                    if len(row) != 4:
+                        continue  # Skip rows with invalid format
+                    name, details, net, price = row
+                    
+                    # Insertar los ítems en la base de datos
+                    query = """
+                        INSERT INTO items (user_id, name, details, net, price, status, date, user_email)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    """
+                    database_api.conectar()
+                    database_api.db.execute(query, (
+                        user_id,
+                        name,
+                        details,
+                        float(net),
+                        float(price),
+                        'in stock',  # Estado predeterminado
+                        datetime.now().strftime('%Y-%m-%d'),
+                        session['user']  # El correo del usuario actual
+                    ))
+                    database_api.desconectar()
+
+                    items_created += 1
+
+                flash(f'{items_created} ítems fueron cargados correctamente!')
+                return redirect(url_for('main.view_profile', user_id=user_id))
+
+            except Exception as e:
+                flash('Error al cargar el archivo. Por favor, revise el formato.')
+                print(f"Error: {e}")
+                return redirect(url_for('main.view_profile', user_id=user_id))
+
+        else:
+            flash('Por favor, cargue un archivo CSV.')
+            return redirect(url_for('main.view_profile', user_id=user_id))
+    else:
+        return redirect(url_for('main.login'))
+    
+
+
+
+# Función para manejar la venta de un ítem y su cambio de estado a "SOLD"
+@main_blueprint.route('/complete_sale', methods=['POST'])
+def complete_sale():
+    try:
+        item_id = request.form['item_id']
+        payment_amount = float(request.form['payment_amount'])  # Monto pagado
+        due_amount = float(request.form['due_amount'])  # Monto pendiente
+
+        # Verifica si el pago cubre el monto total (DUE debe ser 0)
+        if payment_amount < due_amount:
+            flash("El monto pagado es insuficiente. El pago no es completo.")
+            return redirect(url_for('main.pos'))  # O a la página del POS
+
+        # Actualiza el estado del ítem a "SOLD"
+        query_update = """
+        UPDATE items
+        SET status = 'sold'
+        WHERE id = %s
+        """
+        database_api.conectar()
+        database_api.db.execute(query_update, (item_id,))
+        database_api.desconectar()
+
+        # Si todo está bien, redirige al administrador a la vista de payout o el historial de ventas
+        flash('Venta completada con éxito.')
+        return redirect(url_for('main.payout'))
+
+    except Exception as e:
+        database_api.desconectar()
+        flash(f'Error al completar la venta: {str(e)}')
+        return redirect(url_for('main.pos'))
+
+
+# Función para generar el recibo
+@main_blueprint.route('/generate_receipt', methods=['POST'])
+def generate_receipt():
+    try:
+        # Obtener los detalles de la venta (monto pagado, ítems, etc.)
+        sale_id = request.form['sale_id']
+        items = get_items_for_sale(sale_id)  # Aquí deberías obtener los ítems relacionados con esta venta
+        total_amount = request.form['total_amount']  # Total de la venta
+        payment_method = request.form['payment_method']  # Efectivo, tarjeta, etc.
+
+        # Generar el recibo como PDF o mostrarlo en pantalla
+        generate_pdf_receipt(items, total_amount, payment_method, sale_id)
+
+        # Redirige a la página de confirmación o la vista de ventas
+        flash('Recibo generado correctamente.')
+        return redirect(url_for('main.pos'))
+
+    except Exception as e:
+        flash(f'Error al generar el recibo: {str(e)}')
+        return redirect(url_for('main.pos'))
+    
+@main_blueprint.route('/pos', methods=['GET', 'POST'])
+def pos():
+    if 'user_type' in session and session['user_type'] == 'admin':
+        # Obtener todos los ítems disponibles
+        database_api.conectar()
+        query = "SELECT * FROM items WHERE status != 'sold'"
+        database_api.db.execute(query)
+        items = database_api.db.fetchall()
+        database_api.desconectar()
+
+        if request.method == 'POST':
+            item_id = request.form.get('item_id')  # El ID del ítem seleccionado
+            payment_amount = float(request.form.get('payment_amount'))
+            payment_method = request.form.get('payment_method')
+
+            # Actualizar el estado del ítem a 'sold'
+            database_api.conectar()
+            query_update = "UPDATE items SET status = 'sold' WHERE id = %s"
+            database_api.db.execute(query_update, (item_id,))
+            database_api.desconectar()
+
+            # Aquí debes añadir la lógica para el pago y calcular el monto restante
+
+            return redirect(url_for('main.pos'))
+
+        return render_template('pos.html', items=items)
+    else:
+        return redirect(url_for('main.login'))
+
+
+
+# Manejo de errores de actualización de ítem
+@main_blueprint.route('/update_item_status', methods=['POST'])
+def update_item_status():
+    try:
+        item_id = request.form['item_id']
+        new_status = request.form['status']
+        
+        # Actualiza el estado del ítem
+        query_update = """
+        UPDATE items
+        SET status = %s
+        WHERE id = %s
+        """
+        database_api.conectar()
+        database_api.db.execute(query_update, (new_status, item_id))
+        database_api.desconectar()
+
+        flash('Estado actualizado correctamente.')
+        return redirect(url_for('main.inventory'))
+    except Exception as e:
+        database_api.desconectar()
+        flash(f'Error al actualizar el ítem: {str(e)}')
+        return redirect(url_for('main.inventory'))

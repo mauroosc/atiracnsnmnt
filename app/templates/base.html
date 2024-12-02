@@ -21,6 +21,10 @@
             <li class="{% if request.endpoint == 'main.profile' %}active{% endif %}">
                 <a href="{{ url_for('main.profile') }}">Profile</a>
             </li>
+            {% if session.get('user_type') == 'admin' %}
+            <!-- Solo visible para administradores -->
+            <li><a href="{{ url_for('main.pos') }}">POS</a></li>
+            {% endif %}
             <li class="{% if request.endpoint == 'main.logout' %}active{% endif %}">
                 <a href="{{ url_for('main.logout') }}">Log out</a>
             </li>

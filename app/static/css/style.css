@@ -255,3 +255,34 @@ nav ul li.active a {
     font-weight: bold;  /* Resalta el texto en negrita */
     text-decoration: underline;  /* O subraya el enlace */
 }
+
+
+
+.search-container {
+    margin-bottom: 20px;  /* Espacio debajo de la barra de búsqueda */
+    text-align: center;  /* Centra la barra de búsqueda */
+}
+
+#search-input {
+    width: 100%;  /* Hace que ocupe todo el ancho disponible */
+    max-width: 400px;  /* Establece un ancho máximo para la barra */
+    padding: 10px;  /* Añade algo de espacio dentro del campo */
+    font-size: 16px;  /* Tamaño de fuente legible */
+    border: 1px solid #ccc;  /* Borde suave */
+    border-radius: 5px;  /* Bordes redondeados */
+    background-color: #f8f8f8;  /* Fondo gris claro */
+    color: #333;  /* Color del texto */
+    transition: border-color 0.3s ease;  /* Transición suave para el borde al hacer foco */
+    margin-top: 15px;
+}
+
+#search-input:focus {
+    border-color: #4CAF50;  /* Cambia el borde a verde cuando el campo está enfocado */
+    outline: none;  /* Elimina el borde azul predeterminado del navegador */
+}
+
+#search-input::placeholder {
+    color: #aaa;  /* Color gris para el texto del placeholder */
+}
+
+
