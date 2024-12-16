@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash
 import csv
 from datetime import datetime
 
+
 load_dotenv()
 
 class database():
@@ -879,60 +880,45 @@ def reset_password(token):
 @main_blueprint.route('/import_items/<int:user_id>', methods=['POST'])
 def import_items(user_id):
     if 'user_type' in session and session['user_type'] == 'admin':
-        if 'file' not in request.files:
-            flash('No file selected')
-            return redirect(url_for('main.view_profile', user_id=user_id))
-
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(url_for('main.view_profile', user_id=user_id))
-
+        file = request.files.get('file')
+        
         if file and file.filename.endswith('.csv'):
             try:
-                # Procesar el archivo CSV
-                items_created = 0
-                csv_file = csv.reader(file.stream.read().decode('utf-8').splitlines())
-                next(csv_file)  # Skip header row
-                for row in csv_file:
-                    if len(row) != 4:
-                        continue  # Skip rows with invalid format
-                    name, details, net, price = row
-                    
-                    # Insertar los ítems en la base de datos
-                    query = """
-                        INSERT INTO items (user_id, name, details, net, price, status, date, user_email)
-                        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    """
-                    database_api.conectar()
-                    database_api.db.execute(query, (
-                        user_id,
-                        name,
-                        details,
-                        float(net),
-                        float(price),
-                        'in stock',  # Estado predeterminado
-                        datetime.now().strftime('%Y-%m-%d'),
-                        session['user']  # El correo del usuario actual
-                    ))
-                    database_api.desconectar()
+                # Leer el archivo CSV
+                csv_data = csv.reader(file.stream)
+                next(csv_data)  # Saltar el encabezado si lo tiene
 
-                    items_created += 1
+                # Procesar cada fila del CSV
+                for row in csv_data:
+                    # Asegurarse de que la fila tiene los datos necesarios
+                    if len(row) >= 4:
+                        name = row[0]
+                        details = row[1]
+                        price = float(row[2])
+                        net = float(row[3])
+                        status = 'in stock'
+                        date = datetime.now().strftime('%Y-%m-%d')
 
-                flash(f'{items_created} ítems fueron cargados correctamente!')
+                        # Insertar los datos en la base de datos
+                        query = """
+                        INSERT INTO items (user_id, name, details, price, net, status, date)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
+                        """
+                        database_api.conectar()
+                        database_api.db.execute(query, (user_id, name, details, price, net, status, date))
+                        database_api.desconectar()
+                
+                flash("Archivo cargado correctamente y los ítems han sido importados.", "success")
                 return redirect(url_for('main.view_profile', user_id=user_id))
 
             except Exception as e:
-                flash('Error al cargar el archivo. Por favor, revise el formato.')
-                print(f"Error: {e}")
+                flash(f"Hubo un error al importar los ítems: {e}", "error")
                 return redirect(url_for('main.view_profile', user_id=user_id))
-
         else:
-            flash('Por favor, cargue un archivo CSV.')
+            flash("Por favor, seleccione un archivo CSV válido.", "error")
             return redirect(url_for('main.view_profile', user_id=user_id))
     else:
         return redirect(url_for('main.login'))
-    
 
 
 
