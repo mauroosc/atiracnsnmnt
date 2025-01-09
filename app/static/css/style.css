@@ -1,288 +1,185 @@
-*{
+/* ======= Reset General ======= */
+* {
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: sans-serif;
+    font-family: Arial, sans-serif;
 }
 
+/* ======= Estilos Generales ======= */
 body {
-    background: #141517;
-    margin: 0; /* Asegúrate de que el body no tenga margen */
+    background: #f7f9fc; /* Fondo claro */
+    color: #333; /* Color de texto legible */
+    margin: 0;
     padding: 0;
-    width: 100%; /* Asegúrate de que el body ocupe el 100% del ancho */
-}
-
-button{
-    background: #53fc18;
-    padding: 10px;
-    cursor:pointer; 
-    color: #111827; 
-    margin: auto;
-    border: none;   
-    border-radius: 5px;
-    align-items: center;    
-    font-weight: bold;
     width: 100%;
-    transition: background .3s;
 }
 
-.container{
-text-align: center;
-}
-
-h1{
+h1, h2 {
     text-align: center;
-    padding: 30px;
-}
-
-h2{
-    text-align: center;
-    color: #f2f3f5;
     margin-bottom: 15px;
+    color: #2a3b56; /* Títulos en azul profesional */
 }
 
-form{
-    background: #090a0b;
+h1 {
+    padding: 30px;
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+h2 {
+    font-size: 1.5rem;
+}
+
+p {
+    text-align: center;
+    padding: 20px;
+    font-size: 1rem;
+    color: #555;
+}
+
+.container, .button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* ======= Botones ======= */
+button, .action-link, .new-account {
+    background: #2a9df4; /* Azul profesional */
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-weight: bold;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s, transform 0.2s;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+button:hover, .action-link:hover, .new-account:hover {
+    background: #1a7fc2;
+    transform: scale(1.05);
+}
+
+/* Botones secundarios */
+.action-link:nth-of-type(1) {
+    background-color: #e7f3ff; /* Azul claro */
+    color: #2a9df4;
+}
+
+.action-link:nth-of-type(2) {
+    background-color: #ffe5e5; /* Rojo claro */
+    color: #e74c3c;
+}
+
+.action-link:nth-of-type(1):hover {
+    background-color: #cce5ff;
+    color: #1a7fc2;
+}
+
+.action-link:nth-of-type(2):hover {
+    background-color: #ffcccc;
+    color: #c0392b;
+}
+
+/* ======= Formularios ======= */
+form {
+    background: #ffffff;
     padding: 30px;
     max-width: 450px;
-    margin:auto;
+    margin: auto;
     border-radius: 0.75rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+label {
+    color: #2a3b56;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
 }
 
 input {
     width: 100%;
-    height: 35px; /* Ajusta este valor según la altura deseada */
-    box-sizing: border-box;
-    background: #444444;
-    padding: 6px 10px; /* Puedes ajustar esto también si deseas cambiar el espaciado interno */
-    color: #f2f3f5;
+    height: 35px;
+    background: #f0f4f8;
+    padding: 6px 10px;
+    color: #333;
     border-radius: 6px;
-    border: 0;
-    margin-top: 5px;
+    border: 1px solid #ccd1d9;
+    margin-bottom: 15px;
 }
 
-
-.form_input{
-    padding: 10px 20px;
-}
-
-label{
-    color: #58bc82
-}
-
-/* ======= Estilo del Menú ======= */
+/* ======= Menú ======= */
 .menu {
-    background-color: #333;
+    background-color: #ffffff;
     padding: 10px 0;
     position: fixed;
     width: 70%;
+    left: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     z-index: 1000;
-    left: 50%; /* Posiciona el menú a la mitad de la ventana */
-    transform: translateX(-50%); /* Ajusta para centrar */
 }
 
 .menu ul {
-    list-style-type: none; /* Elimina los puntos de la lista */
-    margin: 0; /* Elimina el margen */
-    padding: 0; /* Elimina el padding */
-    display: flex; /* Muestra los elementos en una fila */
-    justify-content: center; /* Centra los elementos horizontalmente */
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
 }
 
 .menu ul li {
-    margin: 0 20px; /* Espaciado entre los elementos de la lista */
+    margin: 0 20px;
 }
 
 .menu ul li a {
-    color: #f5f5f5; /* Color del texto de los enlaces */
-    text-decoration: none; /* Elimina el subrayado */
-    padding: 10px 15px; /* Espaciado dentro de los enlaces */
-    border-radius: 5px; /* Bordes redondeados */
-    transition: background-color 0.3s ease; /* Suaviza el cambio de color */
+    color: #2a3b56;
+    text-decoration: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s;
 }
 
 .menu ul li a:hover {
-    background-color: #555; /* Color de fondo al pasar el ratón */
+    background-color: #f0f4f8;
+    color: #1a7fc2;
 }
 
 .menu ul li a.active {
-    background-color: #444; /* Color de fondo para el enlace activo */
-    color: #fff; /* Color del texto para el enlace activo */
+    background-color: #e7f3ff;
+    color: #2a9df4;
 }
 
-/* ======= Estilo para todas las tablas ======= */
+/* ======= Tablas ======= */
 table {
-    width: 80%; /* Ocupa el ancho completo */
-    margin: 40px auto; /* Espaciado superior e inferior */
-    border-collapse: collapse; /* Colapsa bordes */
-    background-color: #2e2e2e; /* Fondo oscuro para la tabla */
-    font-size: 14px; /* Cambia este valor al tamaño de fuente que prefieras */
+    width: 80%;
+    margin: 40px auto;
+    border-collapse: collapse;
+    background-color: #ffffff;
+    font-size: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 table th, table td {
-    border: 1px solid #444; /* Borde de las celdas */
-    padding: 10px; /* Espaciado interno de las celdas */
-    text-align: center; /* Centra el texto en las celdas */
-    color: #f5f5f5; /* Color del texto */
+    border: 1px solid #ccd1d9;
+    padding: 10px;
+    text-align: center;
 }
 
 table th {
-    background-color: #444; /* Fondo para los encabezados */
-    font-weight: bold; /* Negrita para los encabezados */
+    background-color: #f0f4f8;
+    font-weight: bold;
+    color: #2a3b56;
 }
 
 table tr:nth-child(even) {
-    background-color: #333; /* Color de fondo para filas pares */
+    background-color: #f7f9fc;
 }
 
 table tr:hover {
-    background-color: #555; /* Color de fondo al pasar el ratón sobre una fila */
+    background-color: #e7f3ff;
 }
-
-
-/* Estilo para el enlace "Edit" */
-.action-link:nth-of-type(1) {
-    color: #00bcd4; /* Color específico para "Edit" */
-    background-color: #00bbd433;
-}
-
-/* Estilo para el enlace "Delete" */
-.action-link:nth-of-type(2) {
-    color: #ff4444; /* Color específico para "Delete" */
-    background-color: #ff44442d;
-}
-
-/* Efecto hover para "Edit" */
-.action-link:nth-of-type(1):hover {
-    background-color: #0097a7; /* Color de fondo diferente al pasar el ratón */
-    color: white; /* Cambia el color del texto al pasar el ratón */
-}
-
-/* Efecto hover para "Delete" */
-.action-link:nth-of-type(2):hover {
-    background-color: #cc0000; /* Color de fondo diferente al pasar el ratón */
-    color: white; /* Cambia el color del texto al pasar el ratón */
-}
-
-/* Estilo común para ambos enlaces */
-.action-link {
-    text-decoration: none; /* Elimina el subrayado */
-    padding: 5px 10px; /* Espaciado interno */
-    border-radius: 5px; 
-    transition: background-color 0.3s ease; /* Suaviza el cambio de color */
-}
-
-p{
-    text-align: center;
-    padding: 65px 0 0 0;
-    color: #f2f3f5; 
-}
-
-
-.new-account {
-    text-decoration: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
-    color: white; 
-    background-color: #008000;
-}
-
-.button-container {
-    margin-top: 35px; /* Ajusta este valor para aumentar la separación */
-    text-align: center; /* Opcional: centra el botón */
-}
-
-
-.user-email{
-text-decoration: none;
-Color: white;
-}
-
-
-.form-edit {
-    background: #090a0b; /* Fondo del formulario */
-    padding: 30px; /* Espaciado interno */
-    max-width: 450px; /* Ancho máximo */
-    margin: 20px auto; /* Centrar el formulario y margen superior */
-    border-radius: 0.75rem; /* Bordes redondeados */
-    margin-top: 40px;
-}
-
-.form-edit label {
-    color: #58bc82; /* Color de las etiquetas */
-}
-
-.form-edit input,
-.form-edit select {
-    width: 100%; /* Ancho completo */
-    height: 35px; /* Altura del input */
-    box-sizing: border-box;
-    background: #444444;
-    padding: 6px 10px; /* Espaciado interno */
-    color: #f2f3f5;
-    border-radius: 6px;
-    border: 0;
-    margin-top: 5px;
-    margin-bottom: 15px; /* Espacio entre inputs */
-}
-
-.profile-container{
-    padding: 60px 0 5px 0;
-}
-
-.user-info p{
-    padding: 10px;
-    text-align: center;
-}
-
-
-.button-container button{
-    width: 160px;
-}
-
-.alert {
-    color: red;
-    background-color: #f8d7da;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #f5c6cb;
-    border-radius: 5px;
-}
-
-nav ul li.active a {
-    color: #a0d5eb;  /* Cambia el color del texto o el fondo según lo necesites */
-    font-weight: bold;  /* Resalta el texto en negrita */
-    text-decoration: underline;  /* O subraya el enlace */
-}
-
-
-
-.search-container {
-    margin-bottom: 20px;  /* Espacio debajo de la barra de búsqueda */
-    text-align: center;  /* Centra la barra de búsqueda */
-}
-
-#search-input {
-    width: 100%;  /* Hace que ocupe todo el ancho disponible */
-    max-width: 400px;  /* Establece un ancho máximo para la barra */
-    padding: 10px;  /* Añade algo de espacio dentro del campo */
-    font-size: 16px;  /* Tamaño de fuente legible */
-    border: 1px solid #ccc;  /* Borde suave */
-    border-radius: 5px;  /* Bordes redondeados */
-    background-color: #f8f8f8;  /* Fondo gris claro */
-    color: #333;  /* Color del texto */
-    transition: border-color 0.3s ease;  /* Transición suave para el borde al hacer foco */
-    margin-top: 15px;
-}
-
-#search-input:focus {
-    border-color: #4CAF50;  /* Cambia el borde a verde cuando el campo está enfocado */
-    outline: none;  /* Elimina el borde azul predeterminado del navegador */
-}
-
-#search-input::placeholder {
-    color: #aaa;  /* Color gris para el texto del placeholder */
-}
-
-
